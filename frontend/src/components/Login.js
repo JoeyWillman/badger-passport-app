@@ -1,5 +1,6 @@
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
+import React, { useState } from "react"; 
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -23,3 +24,4 @@ function Login() {
     </div>
   );
 }
+export default Login;

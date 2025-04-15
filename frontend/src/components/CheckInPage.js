@@ -64,4 +64,4 @@ function CheckInPage() {
       </div>
     );
   }
-  
+  export default CheckInPage;

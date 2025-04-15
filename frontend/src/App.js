@@ -9,8 +9,7 @@ import MapPage from './components/MapPage';
 import FeedPage from './components/FeedPage';
 import ChecklistPage from './components/ChecklistPage';
 import BadgesPage from './components/BadgesPage';
-// Optional:
-import LeaderboardPage from './components/LeaderboardPage'; // if implemented
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -43,7 +42,6 @@ function App() {
         <Route path="/feed" element={<FeedPage />} />
         <Route path="/checklist" element={<ChecklistPage user={user} />} />
         <Route path="/badges" element={<BadgesPage user={user} />} />
-        <Route path="/leaderboard" element={<LeaderboardPage />} /> {/* optional */}
         <Route path="*" element={<Navigate to="/map" />} />
       </Routes>
     </Router>
