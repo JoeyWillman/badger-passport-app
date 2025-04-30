@@ -1,28 +1,94 @@
-import React, { useState, useEffect } from 'react';
+// src/components/ChecklistPage.js
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 function ChecklistPage({ user }) {
   const [locations, setLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [visited, setVisited] = useState(new Set());
 
   useEffect(() => {
-    fetch('/api/locations')
-      .then(res => res.json())
-      .then(data => setLocations(data));
-  }, []);
+    const fetchLocations = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch("/api/locations", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        setLocations(data);
+        setVisited(new Set(user.visitedLocations || []));
+      } catch (err) {
+        console.error("Failed to fetch locations:", err);
+        toast.error("Could not load checklist.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const visitedSet = new Set(user.visitedLocations || []);
+    fetchLocations();
+  }, [user]);
+
+  const toggleVisited = async (locId) => {
+    const newVisited = new Set(visited);
+    const isVisited = visited.has(locId);
+
+    if (isVisited) {
+      newVisited.delete(locId);
+    } else {
+      newVisited.add(locId);
+    }
+
+    setVisited(newVisited);
+
+    try {
+      const token = await user.getIdToken();
+      await fetch(`/api/users/visit`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ locationId: locId }),
+      });
+    } catch (err) {
+      toast.error("Could not update visit.");
+    }
+  };
+
+  if (loading) return <div className="text-center mt-5">Loading checklist...</div>;
 
   return (
-    <div>
-      <h2>My Checklist</h2>
-      <ul>
-        {locations.map(loc => (
-          <li key={loc._id}>
-            <input type="checkbox" checked={visitedSet.has(loc._id)} readOnly />
-            {visitedSet.has(loc._id) ? <s>{loc.name}</s> : loc.name}
-          </li>
+    <div className="container mt-4">
+      <h2 className="mb-3">📝 My UW Checklist</h2>
+      <ul className="list-group">
+        {locations.map((loc) => (
+          <ChecklistItem
+            key={loc._id}
+            loc={loc}
+            visited={visited.has(loc._id)}
+            onToggle={() => toggleVisited(loc._id)}
+          />
         ))}
       </ul>
     </div>
+  );
+}
+
+function ChecklistItem({ loc, visited, onToggle }) {
+  return (
+    <li className="list-group-item d-flex align-items-center">
+      <input
+        type="checkbox"
+        checked={visited}
+        onChange={onToggle}
+        className="form-check-input me-2"
+      />
+      <span className={visited ? "text-decoration-line-through" : ""}>
+        {loc.name}
+      </span>
+    </li>
   );
 }
 
