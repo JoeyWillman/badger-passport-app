@@ -8,7 +8,7 @@ const path = require("path");
 dotenv.config(); // Load environment variables from .env
 
 const authMiddleware = require("./authMiddleware");
-const userRoutes = require("./routes/user"); // 🔁 lowercase for cross-platform compatibility
+const userRoutes = require("./routes/User"); // 🔁 lowercase for cross-platform compatibility
 const locationRoutes = require("./routes/location");
 const checkinRoutes = require("./routes/checkin");
 
