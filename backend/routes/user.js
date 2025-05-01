@@ -1,27 +1,26 @@
 const express = require("express");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 const authMiddleware = require("../authMiddleware");
 
 const router = express.Router();
 
-// 🔐 Generate a JWT token
-const generateToken = (user) => {
-  return jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+// 🔐 Generate JWT
+const generateToken = (user) =>
+  jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
-};
 
-// ✅ Register new user
-// POST /api/users/signup
+// ✅ Signup - Register new user1
 router.post("/signup", async (req, res) => {
   const { email, password, name } = req.body;
-
-  if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
+  if (!email || !password)
+    return res.status(400).json({ error: "Email and password are required" });
 
   try {
     const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: "User already exists" });
+    if (existing)
+      return res.status(400).json({ error: "User already exists" });
 
     const newUser = new User({ email, password, name });
     await newUser.save();
@@ -37,8 +36,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// ✅ Login user
-// POST /api/users/login
+// ✅ Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -59,8 +57,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Get profile
-// GET /api/users/profile
+// ✅ Get user profile
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -72,16 +69,15 @@ router.get("/profile", authMiddleware, async (req, res) => {
 });
 
 // ✅ Toggle visited location
-// POST /api/users/visit
 router.post("/visit", authMiddleware, async (req, res) => {
   const { locationId } = req.body;
-
-  if (!locationId) return res.status(400).json({ error: "Location ID is required" });
+  if (!locationId)
+    return res.status(400).json({ error: "Location ID is required" });
 
   try {
     const user = await User.findById(req.user.id);
-
     const alreadyVisited = user.visitedLocations?.includes(locationId);
+
     if (alreadyVisited) {
       user.visitedLocations.pull(locationId);
     } else {
@@ -100,7 +96,7 @@ router.post("/visit", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ GET /api/users/lookup/:id → return user's name
+// ✅ Get user name by ID
 router.get("/lookup/:id", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("name");
@@ -111,6 +107,5 @@ router.get("/lookup/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user" });
   }
 });
-
 
 module.exports = router;
