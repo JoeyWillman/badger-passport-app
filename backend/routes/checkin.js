@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const authMiddleware = require("../authMiddleware");
 const User = require("../models/user");
-const Location = require("../models/Location");
+const Location = require("../models/Locations");
 const Checkin = require("../models/Checkin");
 
 const router = express.Router();

@@ -9,7 +9,7 @@ dotenv.config(); // Load environment variables from .env
 
 const authMiddleware = require("./authMiddleware");
 const userRoutes = require("./routes/user"); // 🔁 lowercase for cross-platform compatibility
-const locationRoutes = require("./routes/location");
+const locationRoutes = require("./routes/locations");
 const checkinRoutes = require("./routes/checkin");
 
 const app = express();
