@@ -13,15 +13,16 @@ const router = express.Router();
 // 🔧 Configure multer for photo upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = "uploads/";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    const dir = path.join(__dirname, "..", "uploads");
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
+    cb(null, `${Date.now()}${ext}`);
   },
 });
+
 const upload = multer({ storage });
 
 /**
@@ -35,7 +36,6 @@ router.post("/", authMiddleware, upload.single("photo"), async (req, res) => {
     const { locationId, caption } = req.body;
     const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    // ✅ Save new check-in
     const newCheckin = new Checkin({
       userId: firebaseUserId,
       locationId,
@@ -44,7 +44,7 @@ router.post("/", authMiddleware, upload.single("photo"), async (req, res) => {
     });
     await newCheckin.save();
 
-    // ✅ Update visitedLocations and fetch user
+    // Update visited locations
     const user = await User.findOne({ firebaseUid: firebaseUserId });
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -52,7 +52,7 @@ router.post("/", authMiddleware, upload.single("photo"), async (req, res) => {
       user.visitedLocations.push(locationId);
     }
 
-    // ✅ Badge logic
+    // Badge logic
     const allLocations = await Location.find();
     const totalLocations = allLocations.length;
     const visitedCount = user.visitedLocations.length;
@@ -70,7 +70,6 @@ router.post("/", authMiddleware, upload.single("photo"), async (req, res) => {
       newBadges.push("All Done");
     }
 
-    // ✅ Update user badges
     user.badges = [...new Set([...(user.badges || []), ...newBadges])];
     await user.save();
 
