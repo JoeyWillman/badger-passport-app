@@ -11,7 +11,7 @@ const generateToken = (user) =>
     expiresIn: "7d",
   });
 
-// ✅ Signup - Register new user1
+// ✅ Register
 router.post("/signup", async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password)
@@ -57,7 +57,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Get user profile
+// ✅ Profile
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -68,7 +68,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Toggle visited location
+// ✅ Visit toggle
 router.post("/visit", authMiddleware, async (req, res) => {
   const { locationId } = req.body;
   if (!locationId)
@@ -96,14 +96,14 @@ router.post("/visit", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Get user name by ID
+// ✅ Inline user lookup handler to avoid "not a function" error
 router.get("/lookup/:id", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("name");
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   } catch (err) {
-    console.error("❌ User lookup error:", err);
+    console.error("User lookup failed:", err);
     res.status(500).json({ error: "Failed to fetch user" });
   }
 });
