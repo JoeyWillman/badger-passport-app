@@ -68,3 +68,24 @@ h2 {
 .Toastify__toast--error {
   background-color: #dc3545;
 }
+
+/* src/App.css */
+
+body {
+  background-color: #fefcf8;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.app-main {
+  padding-top: 20px;
+  padding-bottom: 40px;
+  min-height: 90vh;
+}
+
+h2 {
+  font-family: 'Georgia', serif;
+  color: #4b3d2a;
+  border-bottom: 2px dashed #dab88b;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+}

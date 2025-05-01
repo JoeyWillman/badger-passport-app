@@ -1,21 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { ToastContainer } from 'react-toastify';
+// src/App.js
+import React, { useEffect, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css"; // Add custom styling here
 
-import { auth } from './firebaseConfig';
+import { auth } from "./firebaseConfig";
 
-import Navbar from './components/navbar';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import MapPage from './components/MapPage';
-import FeedPage from './components/FeedPage';
-import ChecklistPage from './components/ChecklistPage';
-import BadgesPage from './components/BadgesPage';
-import MyCheckinsPage from './components/MyCheckinsPage';
-import PrivateRoute from './components/PrivateRoute';
-
-import 'react-toastify/dist/ReactToastify.css';
+// Components
+import Navbar from "./components/navbar";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+import MapPage from "./components/MapPage";
+import FeedPage from "./components/FeedPage";
+import ChecklistPage from "./components/ChecklistPage";
+import BadgesPage from "./components/BadgesPage";
+import MyCheckinsPage from "./components/MyCheckinsPage";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,8 +39,8 @@ function App() {
 
   if (checkingAuth) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <h4>🔄 Checking authentication...</h4>
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+        <h4 className="text-muted">🔄 Checking authentication...</h4>
       </div>
     );
   }
@@ -46,11 +54,13 @@ function App() {
         pauseOnFocusLoss
         pauseOnHover
         draggable
+        theme="colored"
       />
 
+      {/* Show navbar only when logged in */}
       {user && <Navbar />}
 
-      <div className="container mt-4">
+      <main className="app-main">
         <Routes>
           {!user ? (
             <>
@@ -81,7 +91,7 @@ function App() {
               />
 
               <Route
-                path="/my-checkins"
+                path="/checkins"
                 element={
                   <PrivateRoute user={user}>
                     <MyCheckinsPage user={user} />
@@ -93,7 +103,7 @@ function App() {
             </>
           )}
         </Routes>
-      </div>
+      </main>
     </Router>
   );
 }

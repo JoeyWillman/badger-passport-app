@@ -1,0 +1,20 @@
+.navbar {
+    background-color: #fff8ef !important;
+    border-bottom: 2px dashed #dab88b;
+  }
+  
+  .navbar-brand {
+    font-family: 'Georgia', serif;
+    color: #7c4d00 !important;
+  }
+  
+  .nav-link {
+    font-weight: 500;
+    color: #4b3d2a !important;
+  }
+  
+  .nav-link:hover {
+    color: #000;
+    text-decoration: underline;
+  }
+  
