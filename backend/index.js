@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ─── Import Routes (FIXED lowercase filenames) ──────────────────────────
-const userRoutes     = require("./routes/blob");      // 
+const userRoutes     = require("./routes/user");      // 
 const locationRoutes = require("./routes/locations");
 const checkinRoutes  = require("./routes/checkin");
 
