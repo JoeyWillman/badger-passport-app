@@ -1,83 +1,70 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const User = require("../models/User");
 const authMiddleware = require("../authMiddleware");
 
 const router = express.Router();
 
-// 🔐 Generate JWT
-const generateToken = (user) =>
-  jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
-
-// ✅ Register
-router.post("/signup", async (req, res) => {
-  const { email, password, name } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Email and password are required" });
-
+/**
+ * @route   POST /api/users
+ * @desc    Create a new user using Firebase UID
+ * @access  Private
+ */
+router.post("/", authMiddleware, async (req, res) => {
   try {
-    const existing = await User.findOne({ email });
-    if (existing)
-      return res.status(400).json({ error: "User already exists" });
+    const firebaseUid = req.user.id;
+    const { name } = req.body;
 
-    const newUser = new User({ email, password, name });
-    await newUser.save();
+    const existing = await User.findOne({ firebaseUid });
+    if (existing) {
+      return res.status(409).json({ error: "User already exists" });
+    }
 
-    res.status(201).json({
-      id: newUser._id,
-      email: newUser.email,
-      token: generateToken(newUser),
+    const newUser = await User.create({
+      firebaseUid,
+      name,
+      friends: [],
+      visitedLocations: [],
+      badges: [],
     });
+
+    res.status(201).json(newUser);
   } catch (err) {
-    console.error("Signup failed:", err);
+    console.error("❌ Signup failed:", err);
     res.status(500).json({ error: "Signup failed" });
   }
 });
 
-// ✅ Login
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
+/**
+ * @route   GET /api/users/me
+ * @desc    Get profile of the current user
+ * @access  Private
+ */
+router.get("/me", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findOne({ email });
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
+    const user = await User.findOne({ firebaseUid: req.user.id }).select("-__v");
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.json({
-      id: user._id,
-      email: user.email,
-      token: generateToken(user),
-    });
-  } catch (err) {
-    console.error("Login failed:", err);
-    res.status(500).json({ error: "Login failed" });
-  }
-});
-
-// ✅ Profile
-router.get("/profile", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password");
     res.json(user);
   } catch (err) {
-    console.error("Fetch profile failed:", err);
-    res.status(500).json({ error: "Profile fetch failed" });
+    console.error("❌ Fetch profile failed:", err);
+    res.status(500).json({ error: "Failed to fetch profile" });
   }
 });
 
-// ✅ Visit toggle
+/**
+ * @route   POST /api/users/visit
+ * @desc    Toggle visited location
+ * @access  Private
+ */
 router.post("/visit", authMiddleware, async (req, res) => {
   const { locationId } = req.body;
-  if (!locationId)
-    return res.status(400).json({ error: "Location ID is required" });
+  if (!locationId) return res.status(400).json({ error: "Location ID is required" });
 
   try {
-    const user = await User.findById(req.user.id);
-    const alreadyVisited = user.visitedLocations?.includes(locationId);
+    const user = await User.findOne({ firebaseUid: req.user.id });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
+    const alreadyVisited = user.visitedLocations.includes(locationId);
     if (alreadyVisited) {
       user.visitedLocations.pull(locationId);
     } else {
@@ -91,20 +78,51 @@ router.post("/visit", authMiddleware, async (req, res) => {
       visitedLocations: user.visitedLocations,
     });
   } catch (err) {
-    console.error("Checklist update error:", err);
+    console.error("❌ Checklist update error:", err);
     res.status(500).json({ error: "Failed to update checklist" });
   }
 });
 
-// ✅ User lookup
-router.get("/lookup/:id", authMiddleware, async (req, res) => {
+/**
+ * @route   GET /api/users/lookup/:uid
+ * @desc    Lookup user by Firebase UID
+ * @access  Private
+ */
+router.get("/lookup/:uid", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("name");
+    const user = await User.findOne({ firebaseUid: req.params.uid }).select("name");
     if (!user) return res.status(404).json({ error: "User not found" });
+
     res.json(user);
   } catch (err) {
-    console.error("User lookup failed:", err);
+    console.error("❌ User lookup failed:", err);
     res.status(500).json({ error: "Failed to fetch user" });
+  }
+});
+
+/**
+ * @route   PUT /api/users/add-friend/:friendUid
+ * @desc    Add a friend by Firebase UID
+ * @access  Private
+ */
+router.put("/add-friend/:friendUid", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUid: req.user.id });
+    const friend = await User.findOne({ firebaseUid: req.params.friendUid });
+
+    if (!user || !friend) {
+      return res.status(404).json({ error: "User or friend not found" });
+    }
+
+    if (!user.friends.includes(friend.firebaseUid)) {
+      user.friends.push(friend.firebaseUid);
+      await user.save();
+    }
+
+    res.json({ message: "Friend added", friends: user.friends });
+  } catch (err) {
+    console.error("❌ Failed to add friend:", err);
+    res.status(500).json({ error: "Failed to add friend" });
   }
 });
 

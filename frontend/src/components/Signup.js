@@ -4,6 +4,7 @@ import { auth } from "../firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import "./Signup.css";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -32,7 +33,7 @@ function Signup() {
 
       if (!res.ok) throw new Error("User creation failed on backend");
 
-      toast.success("Signup successful!");
+      toast.success("✅ Signup successful!");
       navigate("/map");
     } catch (err) {
       console.error("Signup error:", err);
@@ -43,47 +44,53 @@ function Signup() {
   };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: "400px" }}>
-      <h2 className="mb-4">Sign Up</h2>
-      <form onSubmit={handleSignup}>
-        <div className="mb-3">
-          <label>Display Name</label>
-          <input
-            type="text"
-            className="form-control"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            minLength={2}
-          />
+    <div className="signup-container">
+      <div className="signup-card">
+        <h2 className="signup-title">🧳 Create Your Passport Account</h2>
+        <form onSubmit={handleSignup}>
+          <div className="form-group">
+            <label>Display Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              minLength={2}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Password (min 6 characters)</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              autoComplete="new-password"
+            />
+          </div>
+
+          <button type="submit" disabled={loading}>
+            {loading ? "Creating Account..." : "Sign Up"}
+          </button>
+        </form>
+
+        <div className="signup-footer">
+          <small>Already have an account? <a href="/login">Log in</a></small>
         </div>
-        <div className="mb-3">
-          <label>Email</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-        </div>
-        <div className="mb-3">
-          <label>Password (min 6 characters)</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            autoComplete="new-password"
-          />
-        </div>
-        <button type="submit" className="btn btn-success w-100" disabled={loading}>
-          {loading ? "Creating Account..." : "Sign Up"}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

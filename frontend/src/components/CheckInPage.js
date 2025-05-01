@@ -1,6 +1,8 @@
+// src/components/CheckInPage.js
 import React, { useState, useEffect } from 'react';
 import { auth } from '../firebaseConfig';
 import { toast } from 'react-toastify';
+import './CheckInPage.css';
 
 function CheckInPage() {
   const [locationId, setLocationId] = useState("");
@@ -58,7 +60,6 @@ function CheckInPage() {
           setTimeout(() => setBadgeMessage(""), 5000);
         }
 
-        // Reset form
         setLocationId("");
         setCaption("");
         setPhotoFile(null);
@@ -74,19 +75,20 @@ function CheckInPage() {
   };
 
   return (
-    <div className="container mt-4" style={{ maxWidth: "600px" }}>
-      <h2 className="mb-3">📍 Check In to a Location</h2>
+    <div className="checkin-container">
+      <h2 className="checkin-header">📍 Check In to a Location</h2>
 
       {badgeMessage && (
-        <div className="alert alert-success">{badgeMessage}</div>
+        <div className="badge-alert">
+          {badgeMessage}
+        </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="locationSelect" className="form-label">Location</label>
+        <div className="form-group">
+          <label htmlFor="locationSelect">📌 Location</label>
           <select
             id="locationSelect"
-            className="form-select"
             value={locationId}
             onChange={(e) => setLocationId(e.target.value)}
             required
@@ -100,31 +102,29 @@ function CheckInPage() {
           </select>
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="photo" className="form-label">Photo</label>
+        <div className="form-group">
+          <label htmlFor="photo">📷 Upload Photo</label>
           <input
             id="photo"
             type="file"
             accept="image/*"
-            className="form-control"
             onChange={(e) => setPhotoFile(e.target.files[0])}
           />
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="caption" className="form-label">Caption</label>
+        <div className="form-group">
+          <label htmlFor="caption">💬 Caption</label>
           <input
             id="caption"
             type="text"
-            className="form-control"
             placeholder="Say something about this place"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
           />
         </div>
 
-        <button className="btn btn-primary w-100" type="submit" disabled={loading}>
-          {loading ? "Submitting..." : "Submit Check-In"}
+        <button type="submit" disabled={loading}>
+          {loading ? "Submitting..." : "Check In"}
         </button>
       </form>
     </div>

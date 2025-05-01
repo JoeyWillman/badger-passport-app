@@ -52,17 +52,18 @@ function ChecklistPage({ user }) {
         },
         body: JSON.stringify({ locationId: locId }),
       });
+      toast.success(isVisited ? "Location unchecked." : "Location checked!");
     } catch (err) {
       toast.error("Could not update visit.");
     }
   };
 
-  if (loading) return <div className="text-center mt-5">Loading checklist...</div>;
+  if (loading) return <div className="text-center mt-5">📘 Loading your checklist...</div>;
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-3">📝 My UW Checklist</h2>
-      <ul className="list-group">
+    <div className="passport-container">
+      <h2 className="passport-header">🛂 UW Passport Checklist</h2>
+      <ul className="passport-checklist">
         {locations.map((loc) => (
           <ChecklistItem
             key={loc._id}
@@ -78,16 +79,15 @@ function ChecklistPage({ user }) {
 
 function ChecklistItem({ loc, visited, onToggle }) {
   return (
-    <li className="list-group-item d-flex align-items-center">
-      <input
-        type="checkbox"
-        checked={visited}
-        onChange={onToggle}
-        className="form-check-input me-2"
-      />
-      <span className={visited ? "text-decoration-line-through" : ""}>
-        {loc.name}
-      </span>
+    <li className={`passport-item ${visited ? "checked" : ""}`}>
+      <label>
+        <input
+          type="checkbox"
+          checked={visited}
+          onChange={onToggle}
+        />
+        <span>{loc.name}</span>
+      </label>
     </li>
   );
 }

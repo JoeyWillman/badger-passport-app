@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 
 const authMiddleware = require("../authMiddleware");
-const User = require("../models/user");
+const User = require("../models/User");
 const Location = require("../models/Locations");
 const Checkin = require("../models/Checkin");
 
@@ -31,22 +31,23 @@ const upload = multer({ storage });
  */
 router.post("/", authMiddleware, upload.single("photo"), async (req, res) => {
   try {
-    const userId = req.user.id;
+    const firebaseUserId = req.user.id;
     const { locationId, caption } = req.body;
-
     const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     // ✅ Save new check-in
     const newCheckin = new Checkin({
-      userId,
+      userId: firebaseUserId,
       locationId,
       caption,
       photoUrl,
     });
     await newCheckin.save();
 
-    // ✅ Update visited locations
-    const user = await User.findById(userId);
+    // ✅ Update visitedLocations and fetch user
+    const user = await User.findOne({ firebaseUid: firebaseUserId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
     if (!user.visitedLocations.includes(locationId)) {
       user.visitedLocations.push(locationId);
     }
@@ -91,7 +92,9 @@ router.post("/", authMiddleware, upload.single("photo"), async (req, res) => {
  */
 router.get("/my", authMiddleware, async (req, res) => {
   try {
-    const checkins = await Checkin.find({ userId: req.user.id })
+    const firebaseUserId = req.user.id;
+
+    const checkins = await Checkin.find({ userId: firebaseUserId })
       .populate("locationId", "name")
       .sort({ timestamp: -1 });
 

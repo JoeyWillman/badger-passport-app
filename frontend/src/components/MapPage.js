@@ -1,10 +1,11 @@
+// src/components/MapPage.js
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { auth } from '../firebaseConfig';
 import { toast } from 'react-toastify';
+import './MapPage.css';
 
-// Hard-coded API base URL
 const API = 'https://badger-passport-app.onrender.com';
 
 export default function MapPage({ user }) {
@@ -55,7 +56,7 @@ export default function MapPage({ user }) {
         setVisited(prev => new Set(prev).add(locationId));
         toast.success("📸 Check-in successful!");
         if (result.newBadges?.length) {
-          const msg = `🎉 You earned ${result.newBadges.length > 1 ? 'badges' : 'a badge'}: ${result.newBadges.join(', ')}`;
+          const msg = `🎉 Badge${result.newBadges.length > 1 ? 's' : ''} earned: ${result.newBadges.join(', ')}`;
           setBadgeMessage(msg);
           setTimeout(() => setBadgeMessage(""), 5000);
         }
@@ -68,17 +69,17 @@ export default function MapPage({ user }) {
     }
   };
 
-  const centerPosition = [43.073051, -89.401230];
+  const centerPosition = [43.073051, -89.401230]; // Madison, WI
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-3">🗺️ Campus Map</h2>
-      {badgeMessage && <div className="alert alert-success">{badgeMessage}</div>}
+    <div className="map-container">
+      <h2 className="map-title">🗺️ Explore Campus</h2>
+      {badgeMessage && <div className="badge-alert">{badgeMessage}</div>}
 
       <MapContainer
         center={centerPosition}
         zoom={13}
-        style={{ height: '500px', width: '100%' }}
+        className="leaflet-map"
       >
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
@@ -98,8 +99,8 @@ export default function MapPage({ user }) {
               center={[lat, lng]}
               radius={isVisited ? 10 : 8}
               pathOptions={{
-                color:      isVisited ? 'green' : 'blue',
-                fillColor:  isVisited ? 'green' : 'blue',
+                color: isVisited ? 'green' : 'blue',
+                fillColor: isVisited ? 'green' : 'blue',
                 fillOpacity: 0.8,
                 weight: 2,
               }}

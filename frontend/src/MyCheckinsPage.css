@@ -1,0 +1,49 @@
+.checkins-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fffdf4;
+    border: 2px solid #e3d8b2;
+    border-radius: 12px;
+    font-family: 'Georgia', serif;
+    box-shadow: 0 0 20px rgba(180, 150, 80, 0.1);
+  }
+  
+  .checkins-title {
+    font-size: 2rem;
+    text-align: center;
+    color: #5c412b;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px dashed #c2b28d;
+    padding-bottom: 0.5rem;
+  }
+  
+  .checkin-card {
+    background-color: #fcf9ec;
+    border: 1px solid #dbcaa1;
+    border-left: 5px solid #b9a368;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .checkin-location {
+    font-size: 1.2rem;
+    color: #4b3d29;
+    margin-bottom: 0.5rem;
+  }
+  
+  .checkin-image {
+    width: 100%;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+    border: 1px solid #d8c89f;
+  }
+  
+  .checkin-date {
+    font-size: 0.85rem;
+    color: #888;
+    display: block;
+    text-align: right;
+  }
+  

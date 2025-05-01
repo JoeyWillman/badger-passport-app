@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const checkinSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String, // ✅ Now stores Firebase UID directly
       required: true,
     },
     locationId: {
@@ -27,7 +26,7 @@ const checkinSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt
+    timestamps: true, // Adds createdAt and updatedAt fields automatically
   }
 );
 

@@ -11,3 +11,52 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.passport-container {
+  background: #fefbf2;
+  border: 2px solid #c8b694;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 2rem auto;
+  box-shadow: 0 0 20px rgba(150, 120, 50, 0.1);
+  font-family: 'Georgia', serif;
+}
+
+.passport-header {
+  text-align: center;
+  color: #6b4e2f;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px dashed #b89f73;
+  padding-bottom: 0.5rem;
+}
+
+.passport-checklist {
+  list-style: none;
+  padding-left: 0;
+}
+
+.passport-item {
+  background-color: #fff9ec;
+  border: 1px solid #dccca3;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.passport-item input[type="checkbox"] {
+  margin-right: 12px;
+  transform: scale(1.2);
+}
+
+.passport-item.checked {
+  background-color: #d8efd3;
+  text-decoration: line-through;
+  color: #4b663d;
+  font-weight: bold;
+}

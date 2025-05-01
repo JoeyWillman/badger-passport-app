@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../firebaseConfig";
 import { toast } from "react-toastify";
+import "./FeedPage.css";
 
 function FeedPage() {
   const [feed, setFeed] = useState([]);
@@ -24,7 +25,6 @@ function FeedPage() {
         const data = await res.json();
         setFeed(data);
 
-        // Deduplicate and resolve user/location names
         const userIds = [...new Set(data.map((item) => item.userId))];
         const locationIds = [...new Set(data.map((item) => item.locationId))];
 
@@ -62,31 +62,34 @@ function FeedPage() {
     return map;
   };
 
-  if (loading) return <div className="text-center mt-5">Loading feed...</div>;
+  if (loading) return <div className="feed-container text-center">📮 Loading feed...</div>;
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">🎉 Friend Feed</h2>
-      {feed.length === 0 && <p>No check-ins yet!</p>}
-
-      {feed.map((item) => (
-        <div key={item._id} className="card mb-4 p-3 shadow-sm">
-          <p>
-            <strong>{userNames[item.userId] || item.userId}</strong> checked in at{" "}
-            <strong>{locationNames[item.locationId] || item.locationId}</strong>
-          </p>
-          {item.photoUrl && (
-            <img
-              src={`/${item.photoUrl}`}
-              alt="Check-in"
-              className="img-fluid rounded mb-2"
-              style={{ maxWidth: "100%", height: "auto" }}
-            />
-          )}
-          <p>{item.caption}</p>
-          <small className="text-muted">{new Date(item.timestamp).toLocaleString()}</small>
-        </div>
-      ))}
+    <div className="feed-container">
+      <h2 className="feed-title">📬 Friends’ Passport Feed</h2>
+      {feed.length === 0 ? (
+        <p className="feed-empty">No check-ins yet. Time to explore! 🌎</p>
+      ) : (
+        feed.map((item) => (
+          <div key={item._id} className="feed-card">
+            <p className="feed-heading">
+              <strong>{userNames[item.userId] || "Anonymous"}</strong> checked in at{" "}
+              <strong>{locationNames[item.locationId] || "Somewhere"}</strong>
+            </p>
+            {item.photoUrl && (
+              <img
+                src={`/${item.photoUrl}`}
+                alt="Check-in"
+                className="feed-image"
+              />
+            )}
+            <p className="feed-caption">{item.caption}</p>
+            <p className="feed-timestamp">
+              {new Date(item.timestamp).toLocaleString()}
+            </p>
+          </div>
+        ))
+      )}
     </div>
   );
 }

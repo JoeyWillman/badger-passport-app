@@ -1,28 +1,30 @@
+// src/components/BadgesPage.js
 import React from "react";
-import "./BadgesPage.css"; // optional external styles
+import "./BadgesPage.css";
 
 function BadgesPage({ user }) {
   const allBadges = ["First Check-in", "Halfway There", "All Done"];
   const earnedBadges = new Set(user?.badges || []);
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-3">🏅 My Badges</h2>
-      <div className="row">
+    <div className="badges-container">
+      <h2 className="badges-title">🎖️ Your Passport Badges</h2>
+      <div className="badges-grid">
         {allBadges.map((badge) => {
           const earned = earnedBadges.has(badge);
           return (
             <div
               key={badge}
-              className={`col-md-4 text-center badge-tile ${earned ? "earned" : "locked"}`}
+              className={`badge-card ${earned ? "earned" : "locked"}`}
               aria-label={earned ? `Earned badge: ${badge}` : `Locked badge: ${badge}`}
             >
-              <div className={`badge-icon ${earned ? "earned" : "locked"}`}>
-                {/* Optional: badge icon or emoji */}
-                <span role="img" aria-label="badge">🎖️</span>
+              <div className="badge-icon" title={badge}>
+                <span role="img" aria-label="badge">
+                  {earned ? "🏅" : "🔒"}
+                </span>
               </div>
               <p className="badge-name">{badge}</p>
-              {!earned && <p className="text-muted">🔒 Locked</p>}
+              {!earned && <p className="badge-locked-label">Locked</p>}
             </div>
           );
         })}
