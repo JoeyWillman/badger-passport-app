@@ -5,13 +5,14 @@ import { ToastContainer } from 'react-toastify';
 
 import { auth } from './firebaseConfig';
 
+import Navbar from './components/Naavbar';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import MapPage from './components/MapPage';
 import FeedPage from './components/FeedPage';
 import ChecklistPage from './components/ChecklistPage';
 import BadgesPage from './components/BadgesPage';
-import MyCheckinsPage from './components/MyCheckinsPage'; // ✅ NEW
+import MyCheckinsPage from './components/MyCheckinsPage';
 import PrivateRoute from './components/PrivateRoute';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -29,7 +30,11 @@ function App() {
   }, []);
 
   if (checkingAuth) {
-    return <div className="text-center mt-5">🔄 Checking authentication...</div>;
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <h4>🔄 Checking authentication...</h4>
+      </div>
+    );
   }
 
   return (
@@ -43,35 +48,52 @@ function App() {
         draggable
       />
 
-      <Routes>
-        {!user ? (
-          <>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/*" element={<Login />} />
-          </>
-        ) : (
-          <>
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/feed" element={<FeedPage />} />
-            <Route path="/checklist" element={
-              <PrivateRoute user={user}>
-                <ChecklistPage user={user} />
-              </PrivateRoute>
-            } />
-            <Route path="/badges" element={
-              <PrivateRoute user={user}>
-                <BadgesPage user={user} />
-              </PrivateRoute>
-            } />
-            <Route path="/my-checkins" element={
-              <PrivateRoute user={user}>
-                <MyCheckinsPage />
-              </PrivateRoute>
-            } />
-            <Route path="*" element={<Navigate to="/map" />} />
-          </>
-        )}
-      </Routes>
+      {user && <Navbar />}
+
+      <div className="container mt-4">
+        <Routes>
+          {!user ? (
+            <>
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/*" element={<Login />} />
+            </>
+          ) : (
+            <>
+              <Route path="/map" element={<MapPage user={user} />} />
+              <Route path="/feed" element={<FeedPage user={user} />} />
+
+              <Route
+                path="/checklist"
+                element={
+                  <PrivateRoute user={user}>
+                    <ChecklistPage user={user} />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/badges"
+                element={
+                  <PrivateRoute user={user}>
+                    <BadgesPage user={user} />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/my-checkins"
+                element={
+                  <PrivateRoute user={user}>
+                    <MyCheckinsPage user={user} />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route path="*" element={<Navigate to="/map" replace />} />
+            </>
+          )}
+        </Routes>
+      </div>
     </Router>
   );
 }
