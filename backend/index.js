@@ -8,7 +8,7 @@ const path     = require("path");
 dotenv.config(); // Load .env1
 
 // Routes
-const userRoutes     = require("./routes/User");
+const userRoutes     = require("./routes/");
 const locationRoutes = require("./routes/locations");
 const checkinRoutes  = require("./routes/checkin");
 
