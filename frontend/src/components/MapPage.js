@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { auth } from '../firebaseConfig';
 import { toast } from 'react-toastify';
 
-function MapPage({ user }) {
+const API = process.env.REACT_APP_API_BASE_URL;  // ← your base URL from .env(.local)
+
+export default function MapPage({ user }) {
   const [locations, setLocations] = useState([]);
   const [visited, setVisited] = useState(new Set(user?.visitedLocations || []));
   const [badgeMessage, setBadgeMessage] = useState("");
@@ -13,7 +15,8 @@ function MapPage({ user }) {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const res = await fetch('https://badger-passport-app.onrender.com/api/locations');
+        const res = await fetch(`${API}/api/locations`);
+        if (!res.ok) throw new Error('Failed to fetch locations');
         const data = await res.json();
         setLocations(data);
       } catch (err) {
@@ -25,10 +28,7 @@ function MapPage({ user }) {
   }, []);
 
   const handlePhotoChange = (locationId, file) => {
-    setSelectedPhotos((prev) => ({
-      ...prev,
-      [locationId]: file
-    }));
+    setSelectedPhotos(prev => ({ ...prev, [locationId]: file }));
   };
 
   const handleCheckIn = async (locationId) => {
@@ -43,21 +43,17 @@ function MapPage({ user }) {
         formData.append("photo", selectedPhotos[locationId]);
       }
 
-      const res = await fetch('/api/checkin', {
+      const res = await fetch(`${API}/api/checkin`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-
       const result = await res.json();
 
       if (res.ok) {
-        setVisited((prev) => new Set(prev).add(locationId));
+        setVisited(prev => new Set(prev).add(locationId));
         toast.success("📸 Check-in successful!");
-
-        if (result.newBadges?.length > 0) {
+        if (result.newBadges?.length) {
           const msg = `🎉 You earned ${result.newBadges.length > 1 ? 'badges' : 'a badge'}: ${result.newBadges.join(', ')}`;
           setBadgeMessage(msg);
           setTimeout(() => setBadgeMessage(""), 5000);
@@ -71,64 +67,65 @@ function MapPage({ user }) {
     }
   };
 
-  const centerPosition = [43.073051, -89.401230]; // Madison, WI
+  const centerPosition = [43.073051, -89.401230];
 
   return (
     <div className="container mt-4">
       <h2 className="mb-3">🗺️ Campus Map</h2>
+      {badgeMessage && <div className="alert alert-success">{badgeMessage}</div>}
 
-      {badgeMessage && (
-        <div className="alert alert-success">{badgeMessage}</div>
-      )}
-
-      <MapContainer center={centerPosition} zoom={13} style={{ height: '500px', width: '100%' }}>
+      <MapContainer center={centerPosition} zoom={13}
+        style={{ height: '500px', width: '100%' }}>
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {locations
-          .map(loc => {
-            // Normalize coordinate structure
-            const lat = loc.coords?.lat || loc.lat;
-            const lng = loc.coords?.lng || loc.long || loc.lon;
-            if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+        {locations.map(loc => {
+          const lat = loc.coords?.lat ?? loc.lat;
+          const lng = loc.coords?.lng ?? loc.long ?? loc.lon;
+          if (typeof lat !== 'number' || typeof lng !== 'number') return null;
 
-            return (
-              <Marker key={loc._id} position={[lat, lng]}>
-                <Popup>
-                  <b>{loc.name}</b><br />
-                  {visited.has(loc._id) ? '✅ Visited' : '📍 Not visited yet'}<br />
-                  {!visited.has(loc._id) && (
-                    <>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="form-control mt-2"
-                        onChange={(e) => handlePhotoChange(loc._id, e.target.files[0])}
-                      />
-                      <button
-                        className="btn btn-sm btn-primary mt-2"
-                        onClick={() => handleCheckIn(loc._id)}
-                      >
-                        Check in with photo
-                      </button>
-                    </>
-                  )}
-                  {visited.has(loc._id) && (
+          const isVisited = visited.has(loc._id);
+          return (
+            <CircleMarker
+              key={loc._id}
+              center={[lat, lng]}
+              radius={isVisited ? 10 : 8}
+              pathOptions={{
+                color:      isVisited ? 'green' : 'blue',
+                fillColor:  isVisited ? 'green' : 'blue',
+                fillOpacity: 0.8,
+                weight: 2,
+              }}
+            >
+              <Popup>
+                <strong>{loc.name}</strong><br />
+                {isVisited ? '✅ Visited' : '📍 Not visited yet'}<br />
+                {!isVisited ? (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="form-control mt-2"
+                      onChange={e => handlePhotoChange(loc._id, e.target.files[0])}
+                    />
                     <button
-                      className="btn btn-sm btn-secondary mt-2"
-                      disabled
+                      className="btn btn-sm btn-primary mt-2"
+                      onClick={() => handleCheckIn(loc._id)}
                     >
-                      Already Checked In
+                      Check in with photo
                     </button>
-                  )}
-                </Popup>
-              </Marker>
-            );
-          })}
+                  </>
+                ) : (
+                  <button className="btn btn-sm btn-secondary mt-2" disabled>
+                    Already Checked In
+                  </button>
+                )}
+              </Popup>
+            </CircleMarker>
+          );
+        })}
       </MapContainer>
     </div>
   );
 }
-
-export default MapPage;
