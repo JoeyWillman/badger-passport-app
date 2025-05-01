@@ -6,22 +6,30 @@ function ChecklistPage({ user }) {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visited, setVisited] = useState(new Set());
+  const [grouped, setGrouped] = useState({});
 
   useEffect(() => {
     const fetchLocations = async () => {
       try {
         const token = await user.getIdToken();
         const res = await fetch("/api/locations", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
+
+        const groupedByCategory = data.reduce((acc, loc) => {
+          const category = loc.category || "Uncategorized";
+          if (!acc[category]) acc[category] = [];
+          acc[category].push(loc);
+          return acc;
+        }, {});
+
+        setGrouped(groupedByCategory);
         setLocations(data);
         setVisited(new Set(user.visitedLocations || []));
       } catch (err) {
-        console.error("Failed to fetch locations:", err);
-        toast.error("Could not load checklist.");
+        console.error("Checklist load error:", err);
+        toast.error("Failed to load checklist.");
       } finally {
         setLoading(false);
       }
@@ -31,15 +39,9 @@ function ChecklistPage({ user }) {
   }, [user]);
 
   const toggleVisited = async (locId) => {
-    const newVisited = new Set(visited);
     const isVisited = visited.has(locId);
-
-    if (isVisited) {
-      newVisited.delete(locId);
-    } else {
-      newVisited.add(locId);
-    }
-
+    const newVisited = new Set(visited);
+    isVisited ? newVisited.delete(locId) : newVisited.add(locId);
     setVisited(newVisited);
 
     try {
@@ -52,42 +54,49 @@ function ChecklistPage({ user }) {
         },
         body: JSON.stringify({ locationId: locId }),
       });
-      toast.success(isVisited ? "Location unchecked." : "Location checked!");
+      toast.success(isVisited ? "Location unchecked." : "Checked in!");
     } catch (err) {
-      toast.error("Could not update visit.");
+      toast.error("Update failed.");
     }
   };
 
   if (loading) return <div className="text-center mt-5">📘 Loading your checklist...</div>;
 
   return (
-    <div className="passport-container">
-      <h2 className="passport-header">🛂 UW Passport Checklist</h2>
-      <ul className="passport-checklist">
-        {locations.map((loc) => (
-          <ChecklistItem
-            key={loc._id}
-            loc={loc}
-            visited={visited.has(loc._id)}
-            onToggle={() => toggleVisited(loc._id)}
-          />
-        ))}
-      </ul>
+    <div className="container mt-4">
+      <h2 className="mb-4 passport-header">📍 UW Passport Checklist</h2>
+
+      {Object.keys(grouped).sort().map((category) => (
+        <div key={category} className="mb-5">
+          <h4 className="text-primary border-bottom pb-2 mb-3">{category}</h4>
+          <ul className="list-group">
+            {grouped[category].map((loc) => (
+              <ChecklistItem
+                key={loc._id}
+                loc={loc}
+                visited={visited.has(loc._id)}
+                onToggle={() => toggleVisited(loc._id)}
+              />
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
 
 function ChecklistItem({ loc, visited, onToggle }) {
   return (
-    <li className={`passport-item ${visited ? "checked" : ""}`}>
-      <label>
-        <input
-          type="checkbox"
-          checked={visited}
-          onChange={onToggle}
-        />
-        <span>{loc.name}</span>
-      </label>
+    <li className="list-group-item d-flex align-items-center">
+      <input
+        type="checkbox"
+        className="form-check-input me-2"
+        checked={visited}
+        onChange={onToggle}
+      />
+      <span className={visited ? "text-success fw-semibold" : ""}>
+        {loc.name}
+      </span>
     </li>
   );
 }

@@ -1,0 +1,81 @@
+/* Container */
+.container {
+    background-color: #fffaf3;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(80, 60, 30, 0.1);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  /* Header */
+  .passport-header {
+    font-family: 'Georgia', serif;
+    font-size: 2rem;
+    color: #4b3621;
+    border-bottom: 2px dashed #c0a16b;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  /* Category Titles */
+  h4.text-primary {
+    font-family: 'Georgia', serif;
+    font-size: 1.3rem;
+    color: #3a2f2f;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Checklist List Group */
+  .list-group {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  /* Checklist Items */
+  .list-group-item {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    padding: 12px 16px;
+    border: 1px solid #eee;
+    background-color: #fffef9;
+    transition: background-color 0.2s;
+  }
+  
+  .list-group-item:hover {
+    background-color: #fdf7e3;
+  }
+  
+  /* Checkbox */
+  .form-check-input {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* Checked Text */
+  .text-success {
+    color: #287233 !important;
+  }
+  
+  .fw-semibold {
+    font-weight: 600;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .passport-header {
+      font-size: 1.5rem;
+    }
+  
+    h4.text-primary {
+      font-size: 1.1rem;
+    }
+  
+    .list-group-item {
+      font-size: 0.95rem;
+    }
+  }
+  
