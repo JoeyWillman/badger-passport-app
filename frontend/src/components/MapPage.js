@@ -13,7 +13,7 @@ function MapPage({ user }) {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const res = await fetch('/api/locations');
+        const res = await fetch('https://badger-passport-app.onrender.com/api/locations');
         const data = await res.json();
         setLocations(data);
       } catch (err) {
