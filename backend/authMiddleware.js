@@ -1,8 +1,15 @@
 // authMiddleware.js
 const admin = require('firebase-admin');
-const serviceAccount = require('./config/serviceAccountKey.json');
 
-// Initialize Admin SDK once
+let serviceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  // fallback for local development
+  serviceAccount = require('./config/serviceAccountKey.json');
+}
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -15,10 +22,8 @@ module.exports = async (req, res, next) => {
     }
 
     const idToken = authHeader.split('Bearer ')[1];
-    // Verify the Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(idToken);
 
-    // Attach the user UID/email to req.user for downstream handlers
     req.user = { id: decodedToken.uid, email: decodedToken.email };
     next();
 
