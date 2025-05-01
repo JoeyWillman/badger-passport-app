@@ -5,40 +5,30 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
 import { toast } from "react-toastify";
 
-const API = "https://badger-passport-app.onrender.com";  // your Render backend
-
 export default function Login() {
+  const navigate = useNavigate();
   const [email,        setEmail]        = useState("");
   const [password,     setPassword]     = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading,      setLoading]      = useState(false);
-  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // 1️⃣ Sign in with Firebase
-      const userCred = await signInWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-      const token = await userCred.user.getIdToken();
-
-      // 2️⃣ Fetch user profile from backend
-      const res = await fetch(`${API}/api/users/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to load profile");
-      const profile = await res.json();
-      console.log("🔐 Profile:", profile);
+      // Sign in with Firebase
+      await signInWithEmailAndPassword(auth, email.trim(), password);
 
       toast.success("✅ Logged in successfully!");
       navigate("/map");
     } catch (err) {
       console.error("❌ Login error:", err);
-      toast.error(err.message || "Login failed.");
+      // Friendly error for invalid credentials
+      if (err.code === "auth/invalid-email" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+        toast.error("Invalid email or password.");
+      } else {
+        toast.error(err.message || "Login failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -46,9 +36,8 @@ export default function Login() {
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-      <div className="card shadow-lg p-4" style={{ maxWidth: 400, width: '100%' }}>
-        <h3 className="text-center mb-4">Welcome Back</h3>
-
+      <div className="card shadow-lg p-5" style={{ maxWidth: 400, width: "100%" }}>
+        <h2 className="text-center mb-4">🔑 Welcome Back</h2>
         <form onSubmit={handleLogin}>
           {/* Email */}
           <div className="mb-3">
@@ -102,7 +91,7 @@ export default function Login() {
 
         <div className="text-center mt-3">
           <small className="text-muted">
-            Don't have an account? <a href="/signup">Sign up</a>
+            Don’t have an account? <a href="/signup">Sign up</a>
           </small>
         </div>
       </div>
