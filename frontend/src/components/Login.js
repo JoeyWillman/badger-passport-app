@@ -1,93 +1,79 @@
-import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
-import { auth } from "../firebaseConfig";
-import { toast } from "react-toastify";
+// src/components/Login.js
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebaseConfig';
+import { toast } from 'react-toastify';
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+const API = 'https://badger-passport-app.onrender.com';  // ← your Render backend
+
+export default function Login() {
   const navigate = useNavigate();
+  const [email,    setEmail]    = useState('');
+  const [password, setPassword] = useState('');
+  const [loading,  setLoading]  = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const user = userCredential.user;
+      // 1) Sign in via Firebase
+      await auth.signInWithEmailAndPassword(email, password);
 
-      const token = await user.getIdToken();
-
-      const res = await fetch("/api/users/profile", {
+      // 2) Fetch your backend to create/get a session (if you do server‐side login)
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch(`${API}/api/users/session`, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }
       });
 
-      if (!res.ok) throw new Error("Failed to load user profile.");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Server rejected login');
+      }
 
-      const userProfile = await res.json();
-      console.log("🔐 Profile loaded:", userProfile);
-
-      toast.success("Login successful!");
-      setEmail("");
-      setPassword("");
-      navigate("/map");
+      // 3) All good—go to the map
+      toast.success('✅ Logged in successfully!');
+      navigate('/map');
     } catch (err) {
-      console.error("❌ Login error:", err);
-      toast.error(err.message || "Login failed.");
+      console.error('❌ Login error:', err);
+      toast.error(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: "400px" }}>
-      <h2 className="mb-4">Login</h2>
-      <form onSubmit={handleLogin}>
-        <div className="mb-3">
-          <label htmlFor="email">Email</label>
+    <div className="d-flex justify-content-center align-items-center vh-100">
+      <form className="card p-4" style={{ minWidth: 320 }} onSubmit={handleSubmit}>
+        <h3 className="mb-3 text-center">🔑 Log In</h3>
+        <div className="mb-2">
+          <label>Email</label>
           <input
-            id="email"
             type="email"
             className="form-control"
-            required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            onChange={e => setEmail(e.target.value)}
+            required
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="password">Password</label>
-          <div className="input-group">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              className="form-control"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
+          <label>Password</label>
+          <input
+            type="password"
+            className="form-control"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
         </div>
-        <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-          {loading ? "Logging in..." : "Log In"}
+        <button className="btn btn-primary w-100" disabled={loading}>
+          {loading ? 'Logging in…' : 'Log In'}
         </button>
       </form>
     </div>
   );
 }
-
-export default Login;
