@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const authMiddleware = require("../authMiddleware");
 
-const express = require("express");
 const router = express.Router();
 
 // 🔐 Generate JWT
@@ -97,7 +96,7 @@ router.post("/visit", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Inline user lookup handler to avoid "not a function" error
+// ✅ User lookup
 router.get("/lookup/:id", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("name");
