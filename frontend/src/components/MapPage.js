@@ -8,7 +8,7 @@ function MapPage({ user }) {
   const [locations, setLocations] = useState([]);
   const [visited, setVisited] = useState(new Set(user?.visitedLocations || []));
   const [badgeMessage, setBadgeMessage] = useState("");
-  const [selectedPhotos, setSelectedPhotos] = useState({}); // store photo per location
+  const [selectedPhotos, setSelectedPhotos] = useState({});
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -86,38 +86,46 @@ function MapPage({ user }) {
           attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {locations.map((loc) => (
-          <Marker key={loc._id} position={[loc.coords.lat, loc.coords.lng]}>
-            <Popup>
-              <b>{loc.name}</b><br />
-              {visited.has(loc._id) ? '✅ Visited' : '📍 Not visited yet'}<br />
-              {!visited.has(loc._id) && (
-                <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="form-control mt-2"
-                    onChange={(e) => handlePhotoChange(loc._id, e.target.files[0])}
-                  />
-                  <button
-                    className="btn btn-sm btn-primary mt-2"
-                    onClick={() => handleCheckIn(loc._id)}
-                  >
-                    Check in with photo
-                  </button>
-                </>
-              )}
-              {visited.has(loc._id) && (
-                <button
-                  className="btn btn-sm btn-secondary mt-2"
-                  disabled
-                >
-                  Already Checked In
-                </button>
-              )}
-            </Popup>
-          </Marker>
-        ))}
+        {locations
+          .map(loc => {
+            // Normalize coordinate structure
+            const lat = loc.coords?.lat || loc.lat;
+            const lng = loc.coords?.lng || loc.long || loc.lon;
+            if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+
+            return (
+              <Marker key={loc._id} position={[lat, lng]}>
+                <Popup>
+                  <b>{loc.name}</b><br />
+                  {visited.has(loc._id) ? '✅ Visited' : '📍 Not visited yet'}<br />
+                  {!visited.has(loc._id) && (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="form-control mt-2"
+                        onChange={(e) => handlePhotoChange(loc._id, e.target.files[0])}
+                      />
+                      <button
+                        className="btn btn-sm btn-primary mt-2"
+                        onClick={() => handleCheckIn(loc._id)}
+                      >
+                        Check in with photo
+                      </button>
+                    </>
+                  )}
+                  {visited.has(loc._id) && (
+                    <button
+                      className="btn btn-sm btn-secondary mt-2"
+                      disabled
+                    >
+                      Already Checked In
+                    </button>
+                  )}
+                </Popup>
+              </Marker>
+            );
+          })}
       </MapContainer>
     </div>
   );
