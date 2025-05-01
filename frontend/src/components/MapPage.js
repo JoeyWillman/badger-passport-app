@@ -4,7 +4,8 @@ import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { auth } from '../firebaseConfig';
 import { toast } from 'react-toastify';
 
-const API = process.env.REACT_APP_API_BASE_URL;  // ← your base URL from .env(.local)
+// Hard-coded API base URL
+const API = 'https://badger-passport-app.onrender.com';
 
 export default function MapPage({ user }) {
   const [locations, setLocations] = useState([]);
@@ -74,18 +75,23 @@ export default function MapPage({ user }) {
       <h2 className="mb-3">🗺️ Campus Map</h2>
       {badgeMessage && <div className="alert alert-success">{badgeMessage}</div>}
 
-      <MapContainer center={centerPosition} zoom={13}
-        style={{ height: '500px', width: '100%' }}>
+      <MapContainer
+        center={centerPosition}
+        zoom={13}
+        style={{ height: '500px', width: '100%' }}
+      >
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
         {locations.map(loc => {
           const lat = loc.coords?.lat ?? loc.lat;
           const lng = loc.coords?.lng ?? loc.long ?? loc.lon;
           if (typeof lat !== 'number' || typeof lng !== 'number') return null;
 
           const isVisited = visited.has(loc._id);
+
           return (
             <CircleMarker
               key={loc._id}
