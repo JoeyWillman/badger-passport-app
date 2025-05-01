@@ -100,4 +100,17 @@ router.post("/visit", authMiddleware, async (req, res) => {
   }
 });
 
+// ✅ GET /api/users/lookup/:id → return user's name
+router.get("/lookup/:id", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("name");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    console.error("❌ User lookup error:", err);
+    res.status(500).json({ error: "Failed to fetch user" });
+  }
+});
+
+
 module.exports = router;
