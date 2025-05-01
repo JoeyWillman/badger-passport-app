@@ -5,7 +5,7 @@ const morgan   = require("morgan");
 const dotenv   = require("dotenv");
 const path     = require("path");
 
-dotenv.config(); // Load .env1
+dotenv.config(); // Load .env12
 
 // Routes
 const userRoutes     = require("./routes/User");
