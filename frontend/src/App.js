@@ -5,7 +5,7 @@ import { ToastContainer } from 'react-toastify';
 
 import { auth } from './firebaseConfig';
 
-import Navbar from './components/Naavbar';
+import Navbar from './components/navbar';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import MapPage from './components/MapPage';
