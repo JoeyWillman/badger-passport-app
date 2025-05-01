@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const authMiddleware = require("../authMiddleware");
 
+const express = require("express");
 const router = express.Router();
 
 // 🔐 Generate JWT
